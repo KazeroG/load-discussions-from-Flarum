@@ -179,8 +179,8 @@ $discussions = (new FlarumDiscussionStream())->tag('dev')->fetch();
                 <?= htmlspecialchars($discussion->attributes->title) ?>
             </a></h1>
         <p>
-            Par <?= htmlspecialchars($discussions->relationship($discussion->relationships->startUser)->attributes->username) ?>
-            Sur <?= DateTime::createFromFormat(DATE_ATOM, $discussion->attributes->startTime)->format('Y-m-d H:i') ?>
+            By <?= htmlspecialchars($discussions->relationship($discussion->relationships->startUser)->attributes->username) ?>
+            on <?= DateTime::createFromFormat(DATE_ATOM, $discussion->attributes->startTime)->format('Y-m-d H:i') ?>
         </p>
         <p>
             <?= htmlspecialchars(excerpt($discussions->relationship($discussion->relationships->startPost)->attributes->contentHtml)) ?>
