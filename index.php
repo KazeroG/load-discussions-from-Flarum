@@ -11,7 +11,7 @@ class FlarumDiscussionStream
      * Flarum url without ending slash (same as the url in Flarum config.php)
      * @var string
      */
-    protected $flarumUrl = 'https://manslandlife.tk/forum/v2';
+    protected $flarumUrl = 'https://discuss.flarum.org';
 
     protected $parsedData;
 
@@ -137,6 +137,10 @@ class FlarumDiscussionStream
             $data = $data->data;
         }
 
+        if (is_null($data)) {
+            throw new \Exception('No data for this relationship. This is not handled by this code.');
+        }
+
         if (!property_exists($data, 'type') || !property_exists($data, 'id')) {
             throw new \Exception('Missing type or id in relatinship query');
         }
@@ -170,6 +174,8 @@ function excerpt($text, $length = 200, $ending = '...')
 // Let's fetch some discussions
 $discussions = (new FlarumDiscussionStream())->tag('dev')->fetch();
 
+try {
+
 ?>
 
 <?php foreach ($discussions->discussions() as $discussion): ?>
@@ -183,8 +189,24 @@ $discussions = (new FlarumDiscussionStream())->tag('dev')->fetch();
             on <?= DateTime::createFromFormat(DATE_ATOM, $discussion->attributes->startTime)->format('Y-m-d H:i') ?>
         </p>
         <p>
-            <?= htmlspecialchars(excerpt($discussions->relationship($discussion->relationships->startPost)->attributes->contentHtml)) ?>
+            <?php if ($discussion->relationships->startPost): ?>
+                <?= htmlspecialchars(excerpt($discussions->relationship($discussion->relationships->startPost)->attributes->contentHtml)) ?>
+            <?php else: ?>
+                <em>The content of this post isn't available</em>
+            <?php endif; ?>
         </p>
     </article>
 
 <?php endforeach; ?>
+
+<?php if (count($discussions->discussions()) === 0): ?>
+    <p>Looks like there are no discussions here</p>
+<?php endif; ?>
+
+<?php
+
+} catch (\Exception $exception) {
+    echo "<p><strong>Oops, something went wrong.</strong></p>";
+
+    throw $exception;
+}
